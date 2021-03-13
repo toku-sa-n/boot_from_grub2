@@ -21,7 +21,7 @@ Copyright (c) 2003-2020 Fabrice Bellard and the QEMU Project developers
 
 GRUB2から起動できるOSは，特別なものを除き，[Multiboot2](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html)という規格に準拠している必要があります．Multiboot2に対応するためには，Multiboot2 headerと呼ばれるヘッダをバイナリイメージが保持している必要があります．このヘッダはバイナリイメージの先頭から32768バイト以内に存在する必要があり，かつ64ビットのアラインメントを守っている必要があります．詳しくは[仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#Specification)を確認してください．また，Multiboot2は32ビットの実行ファイルのみが対応していて，64ビットのOSを使用する場合は後述するように32ビットのブートローダを作成し，それを用いてOSを起動させる必要があります．
 
-以下のようなアセンブリファイルを作成します．
+以下のようなアセンブリファイルmultiboot.sを作成します．
 
 ```asm
     .section .multiboot
@@ -85,6 +85,8 @@ C言語の文字列における\0のような，タグの終端を表すため�
 
 前述したとおり，Multiboot2が対応しているアーキテクチャは32ビットのみです．したがって，GRUB2から直接起動できるOSは32ビットのものに限られます．64ビットOSを起動させる場合，32ビットのブートローダをGRUB2から起動し，ロングモードに遷移したあとにカーネルのコードを実行する必要があります．まずはテスト用に仮のブートローダを作成し，それをGRUB2から起動させます．
 
+以下のような仮のブートローダmain.sを作成します．
+
 ```asm
     .intel_syntax noprefix
     .global _start
@@ -97,3 +99,53 @@ _start:
 
 このコードは`EAX`レジスタに`0x334`を代入したあと無限ループをします．レジスタの値はQEMUのデバッグモニタから確認することが可能なので，これを用いて起動できているかを確認します．
 
+#### ブートローダ用のリンカスクリプトを作成する
+
+Multiboot2 headerをバイナリイメージの先頭に位置させるために，リンカスクリプトを用いてヘッダの位置を指定します．
+
+以下のようなリンカスクリプトbootloader.ldを作成します．
+
+```ld
+OUTPUT_FORMAT(elf32-i386)
+
+ENTRY(_start)
+
+SECTIONS
+{
+    .multiboot ALIGN(8) : {
+        *(.multiboot*)
+    }
+
+    .text : {
+        *(.text*)
+    }
+
+    .data : {
+        *(.data*)
+    }
+
+    .rodata : {
+        *(.rodata*)
+    }
+
+    .bss : {
+        *(.bss*)
+    }
+
+    .eh_frame : {
+        *(.eh_frame)
+    }
+}
+```
+
+各セクションは記述した順番と同じようにバイナリイメージ上に並びます．また，`ALIGN`を使用して64ビットのアラインメント制約を守ります．
+
+#### ブートローダイメージを作成する
+
+以下のコマンドを使用してブートローダイメージを作成します．
+
+```zsh
+gcc -o bootloader -T bootloader.ld multiboot.s main.s
+```
+
+これで`bootloader`と名付けられたブートローダイメージが生成されます．
