@@ -158,6 +158,8 @@ gcc -o bootloader -T bootloader.ld multiboot.s main.s
 
 GRUB2の設定ファイルを作成し，OSを起動するためのエントリを作成します．
 
+以下のファイルをgrub.cfgという名前で保存します．
+
 ```conf
 menuentry "OS"{
     multiboot2 /boot/bootloader
@@ -166,3 +168,34 @@ menuentry "OS"{
 ```
 
 これで，"OS"という項目が定義されます．
+
+#### GRUB2のイメージを作成する
+
+QEMU上でテストするために，GRUB2のイメージを作成します．これは[GRUBで簡単なOSカーネルを動かしてみる](http://inaz2.hatenablog.com/entry/2015/12/31/221319)というページを参考にしました．
+
+```zsh
+mkdir -p isofiles/boot/grub
+cp bootloader isofiles/boot/
+cp grub.cfg isofiles/boot/grub/
+```
+
+以下のようなディレクトリ構成になっているはずです．
+
+```
+> tree isofiles
+isofiles
+└── boot
+    ├── bootloader
+    └── grub
+        └── grub.cfg
+
+2 directories, 2 files
+```
+
+ファイルを準備したら，以下のコマンドを使用してイメージを作成します．
+
+```zsh
+grub-mkrescue -o os.iso isofiles
+```
+
+これで，`os.iso`と名付けられたGRUB2のイメージファイルが生成されました．
