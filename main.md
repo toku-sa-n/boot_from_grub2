@@ -23,7 +23,7 @@ GRUB2から起動できるOSは，特別なものを除き，[Multiboot2](https:
 
 以下のようなアセンブリファイルを作成します．
 
-```zsh
+```asm
     .section .multiboot
     .intel_syntax noprefix
 
