@@ -15,6 +15,10 @@ QEMU emulator version 5.2.0
 Copyright (c) 2003-2020 Fabrice Bellard and the QEMU Project developers
 ```
 
+```zsh
+grub-mkrescue (GRUB) 2.05_alpha20200310
+```
+
 ### やり方
 
 #### Multiboot2のヘッダを作成する
@@ -149,3 +153,16 @@ gcc -o bootloader -T bootloader.ld multiboot.s main.s
 ```
 
 これで`bootloader`と名付けられたブートローダイメージが生成されます．
+
+#### GRUB2の設定ファイルを作成する
+
+GRUB2の設定ファイルを作成し，OSを起動するためのエントリを作成します．
+
+```conf
+menuentry "OS"{
+    multiboot2 /boot/bootloader
+    boot
+}
+```
+
+これで，"OS"という項目が定義されます．
