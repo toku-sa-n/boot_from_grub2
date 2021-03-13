@@ -44,10 +44,12 @@ start_multiboot_header:
     .long CHECKSUM
 
     .set TERMINATION, 0
+    .set TERMINATION_FLAGS, 0
     .set TERMINATION_SIZE, 8
 
     .word TERMINATION
-    .word TERMINATION_SIZE
+    .word TERMINATION_FLAGS
+    .long TERMINATION_SIZE
 
 end_multiboot_header:
 ```
@@ -60,6 +62,16 @@ Multiboot2 headerの先頭はマジックナンバです．次にアーキテク
 | MIPS           |    4 |
 
 その次はヘッダサイズです．これはMultiboot2 headerが占めるバイト数です．そしてチェックサムです．これはマジックナンバ，アーキテクチャ番号，そしてヘッダサイズの和のマイナス値です．
+
+ここに述べた4つの値のあと，タグと呼ばれる各種データを任意数配置することが出来ます．タグの構造はだいたい以下のとおりです．詳しくは[仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#Header-tags)を確認してください．
+
+| タグの名前 | バイト数 | 説明                                                        |
+|------------|----------|-------------------------------------------------------------|
+| type       |        2 | タグの番号                                                  |
+| flags      |        2 | もしビット0がセットされているならば，optionalとして扱われる |
+| size       |        4 | タグ全体のサイズ                                            |
+
+C言語の文字列における\0のような，タグの終端を表すためのタグが存在します．このタグはtype = 0, size = 8です．
 
 #### テスト用のブートローダを作成する
 
