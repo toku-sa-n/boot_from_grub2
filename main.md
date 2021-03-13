@@ -19,7 +19,7 @@ Copyright (c) 2003-2020 Fabrice Bellard and the QEMU Project developers
 
 #### Multiboot2のヘッダを作成する
 
-GRUB2から起動できるOSは，特別なものを除き，[Multiboot2](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html)という規格に準拠している必要があります．Multiboot2に対応するためには，Multiboot2 headerと呼ばれるヘッダをバイナリイメージが保持している必要があります．このヘッダはバイナリイメージの先頭から32768バイト以内に存在する必要があり，かつ64ビットのアラインメントを守っている必要があります．((https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#Specification))また，Multiboot2は32ビットの実行ファイルのみが対応していて，64ビットのOSを使用する場合は後述するように32ビットのブートローダを作成し，それを用いてOSを起動させる必要があります．
+GRUB2から起動できるOSは，特別なものを除き，[Multiboot2](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html)という規格に準拠している必要があります．Multiboot2に対応するためには，Multiboot2 headerと呼ばれるヘッダをバイナリイメージが保持している必要があります．このヘッダはバイナリイメージの先頭から32768バイト以内に存在する必要があり，かつ64ビットのアラインメントを守っている必要があります．詳しくは[仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#Specification)を確認してください．また，Multiboot2は32ビットの実行ファイルのみが対応していて，64ビットのOSを使用する場合は後述するように32ビットのブートローダを作成し，それを用いてOSを起動させる必要があります．
 
 以下のようなアセンブリファイルを作成します．
 
