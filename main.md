@@ -308,3 +308,11 @@ GRUB2がブートローダを起動した直後の`EAX`と`EBX`レジスタの�
 まずはロングモードに遷移します．これにはいくつかの過程が必要です．詳細は[Intelの開発者マニュアル](https://software.intel.com/content/www/us/en/develop/download/intel-64-and-ia-32-architectures-sdm-combined-volumes-1-2a-2b-2c-2d-3a-3b-3c-3d-and-4.html)のVolume3の9.8.5に載っています．
 
 1. ページングを無効にする．
+
+[Multiboot2の仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#I386-machine-state)によれば，ブートローダによって起動された直後，ページングは無効になっていますが，今後の仕様変更などによって影響されないよう，ここでページングを再度無効にします．
+
+```asm
+    mov eax, cr0
+    and eax, 0x7fffffff
+    mov cr0, eax
+```
