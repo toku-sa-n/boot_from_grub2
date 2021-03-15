@@ -261,3 +261,5 @@ start_multiboot_header:
 ```ld
 EXTERN(start_multiboot_header)
 ```
+
+参考文献：[How does the -u option for ld work and when is it useful?](https://stackoverflow.com/questions/24834042/how-does-the-u-option-for-ld-work-and-when-is-it-useful)
