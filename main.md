@@ -305,14 +305,24 @@ GRUB2がブートローダを起動した直後の`EAX`と`EBX`レジスタの�
 
 ##### ロングモードへ遷移する
 
-まずはロングモードに遷移します．これにはいくつかの過程が必要です．詳細は[Intelの開発者マニュアル](https://software.intel.com/content/www/us/en/develop/download/intel-64-and-ia-32-architectures-sdm-combined-volumes-1-2a-2b-2c-2d-3a-3b-3c-3d-and-4.html)のVolume3の9.8.5に載っています．
+まずはロングモードに遷移します．これにはいくつかの過程が必要です．詳細は[Intelの開発者マニュアル](https://software.intel.com/content/www/us/en/develop/download/intel-64-and-ia-32-architectures-sdm-combined-volumes-1-2a-2b-2c-2d-3a-3b-3c-3d-and-4.html)（以下SDMと呼称）のVolume3の9.8.5に載っています．
 
 1. ページングを無効にする．
 
-[Multiboot2の仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#I386-machine-state)によれば，ブートローダによって起動された直後，ページングは無効になっていますが，今後の仕様変更などによって影響されないよう，ここでページングを再度無効にします．
+[Multiboot2の仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#I386-machine-state)によれば，ブートローダによって起動された直後，ページングは無効になっていますが，今後の仕様変更などによって影響されないよう，ここでページングを再度無効にします．これは`CR0`レジスタの最上位ビットを0にすることで可能です．`CR0`レジスタを含む，各コントロールレジスタの各ビットの説明については，SDMのVolume3の2.5に載っています．
 
 ```asm
     mov eax, cr0
     and eax, 0x7fffffff
     mov cr0, eax
+```
+
+2. Physical-Addres Extensions (PAE) を有効にする
+
+`CR4`レジスタの第5ビットを1にします．
+
+```asm
+    mov eax, cr4
+    or eax, 0x20
+    mov cr4, eax
 ```
