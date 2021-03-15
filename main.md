@@ -336,7 +336,7 @@ GRUB2がブートローダを起動した直後の`EAX`と`EBX`レジスタの�
 `IA32_EFER`レジスタの値を変更する必要があります．`IA32_EFER`レジスタの各ビットの意味については，SDMのVolume3のTable 2-1を参照してください．このレジスタを操作するには`rdmsr`命令と`wrmsr`命令を使用する必要があります．`rdmsr`命令と`wrmsr`命令の詳細についてはSDMのVolume2を参照してください．
 
 ```asm
-mov ecx, 0xc0000080 // `IA32_EFER`レジスタを指定する．
+mov ecx, 0xc0000080 ; `IA32_EFER`レジスタを指定する．
 rdmsr
 or eax, 0x100
 wrmsr
