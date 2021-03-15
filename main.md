@@ -21,6 +21,8 @@ grub-mkrescue (GRUB) 2.05_alpha20200310
 
 ### やり方
 
+この記事で使用するアセンブリは，GNU Assemblerの文法を使用しています．
+
 #### Multiboot2のヘッダを作成する
 
 GRUB2から起動できるOSは，特別なものを除き，[Multiboot2](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html)という規格に準拠している必要があります．Multiboot2に対応するためには，Multiboot2 headerと呼ばれるヘッダをバイナリイメージが保持している必要があります．このヘッダはバイナリイメージの先頭から32768バイト以内に存在する必要があり，かつ64ビットのアラインメントを守っている必要があります．詳しくは[仕様書](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#Specification)を確認してください．
