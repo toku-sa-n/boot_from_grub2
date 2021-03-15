@@ -263,3 +263,48 @@ EXTERN(start_multiboot_header)
 ```
 
 参考文献：[How does the -u option for ld work and when is it useful?](https://stackoverflow.com/questions/24834042/how-does-the-u-option-for-ld-work-and-when-is-it-useful)
+
+#### 実際のブートローダの作成
+
+仮のブートローダをQEMU上でGRUB2から起動することが出来たので，いよいよ実際のブートローダを作成していきます．
+
+##### 起動情報の保存
+
+GRUB2がブートローダを起動した直後の`EAX`と`EBX`レジスタの内容は以下のとおりです．他の環境については，[Multiboot2の仕様書の3.3](https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#I386-machine-state)を参照してください．
+
+| レジスタの名前 | 格納されている値                           |
+|----------------|--------------------------------------------|
+| EAX            | 0x36d76289                                 |
+| EBX            | Multiboot2が提供する各情報への物理アドレス |
+
+`EBX`レジスタの内容は勿論のこと，`EAX`レジスタの内容も，OSがMultiboot2を認識しているブートローダによって起動されたことを確認するため，保存する必要があります．保存の方法は様々ですが，ここではカーネルのbssセクションに領域を予め空けておいて，そこに保存するやり方を用います．
+
+カーネルのリンカスクリプトを以下のように編集します．
+
+```ld
+    .bss : {
+        MULTIBOOT2_SIGNATURE_LMA = . - LMA_OFFSET;
+        LONG(0)
+
+        MULTIBOOT2_ADDR_LMA = . - LMA_OFFSET;
+        LONG(0)
+
+        /* 後略 */
+    }
+```
+
+`LMA_OFFSET`は，カーネルの物理アドレスへのオフセットです．例えばカーネルを32ビットでは表せない範囲の仮想アドレスに配置する場合，カーネルが配置される物理アドレスと仮想アドレスは異なります．これらの値を使用して，`EAX`レジスタと`EBX`レジスタの内容を保存します．
+
+```asm
+    lea edx, [MULTIBOOT2_SIGNATURE_LMA]
+    mov [edx], eax
+
+    lea edx, [MULTIBOOT2_ADDR_LMA]
+    mov [edx], eax
+```
+
+##### ロングモードへ遷移する
+
+まずはロングモードに遷移します．これにはいくつかの過程が必要です．詳細は[Intelの開発者マニュアル](https://software.intel.com/content/www/us/en/develop/download/intel-64-and-ia-32-architectures-sdm-combined-volumes-1-2a-2b-2c-2d-3a-3b-3c-3d-and-4.html)のVolume3の9.8.5に載っています．
+
+1. ページングを無効にする．
